@@ -26,7 +26,7 @@ class TheaterService {
 
         val seats = (1..15).flatMap { row ->
             (1..36).map { num ->
-                Seat((row + 64).toChar(), num, getPrice(row, num), getDescription(row, num))
+                Seat(0, (row + 64).toChar(), num, getPrice(row, num), getDescription(row, num))
             }
         }
     }

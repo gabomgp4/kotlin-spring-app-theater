@@ -1,5 +1,6 @@
 package com.virtualpairprogrammers.theater.control
 
+import com.virtualpairprogrammers.theater.data.SeatRepository
 import com.virtualpairprogrammers.theater.services.BookingService
 import com.virtualpairprogrammers.theater.services.TheaterService
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,7 +12,8 @@ import org.springframework.web.servlet.ModelAndView
 @Controller
 class MainController(
         val theaterService: TheaterService,
-        val bookingService: BookingService
+        val bookingService: BookingService,
+        val seatRepository: SeatRepository
 ) {
     @RequestMapping("")
     fun homePage() =
@@ -24,6 +26,12 @@ class MainController(
         ModelAndView("seatBooking", mapOf("bean" to bean.copy(
                 result = "Seat $selectedSeat is ${if (result) "available" else "booked"}"
         )))
+    }
+
+    @RequestMapping("bootstrap")
+    fun createInitialData() = run {
+        seatRepository.saveAll(TheaterService.seats)
+        homePage()
     }
 
 }
