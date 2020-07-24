@@ -28,11 +28,11 @@ class MainController(
         )))
     }
 
-    @RequestMapping("bootstrap")
-    fun createInitialData() = run {
-        seatRepository.saveAll(TheaterService.seats)
-        homePage()
-    }
+//    @RequestMapping("bootstrap")
+//    fun createInitialData() = run {
+//        seatRepository.saveAll(TheaterService.seats)
+//        homePage()
+//    }
 
 }
 
