@@ -5,7 +5,6 @@ package com.virtualpairprogrammers.theater.domain
 import java.math.BigDecimal
 import javax.persistence.*
 
-
 @Entity
 data class Seat(
         @Id @GeneratedValue(strategy = GenerationType.AUTO)
