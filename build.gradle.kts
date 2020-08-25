@@ -3,9 +3,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.springframework.boot") version "2.3.1.RELEASE"
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
-    kotlin("jvm") version "1.3.72"
-    kotlin("plugin.spring") version "1.3.72"
-    id("org.jetbrains.kotlin.plugin.jpa") version "1.3.72"
+    kotlin("jvm") version "1.4.0"
+    kotlin("plugin.spring") version "1.4.0"
+    id("org.jetbrains.kotlin.plugin.noarg") version "1.4.0"
 }
 
 group = "com.virtualpairprogrammers"
@@ -39,4 +39,15 @@ tasks.withType<KotlinCompile> {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "11"
     }
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    languageVersion = "1.4"
+}
+
+noArg {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.Embeddable")
+    annotation("javax.persistence.MappedSuperclass")
+    annotation("com.virtualpairprogrammers.theater.annotations.GenerateNoArgConstructor")
 }

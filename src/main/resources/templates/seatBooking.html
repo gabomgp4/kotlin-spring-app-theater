@@ -25,23 +25,20 @@
 
         <input type="submit"/>
     </p>
-
-    <div th:object="${bean.availability}" th:if="${bean.availability!=null}">
-        <th:block th:if="*{available!=null}">
-            Seat <span th:text="*{available.seat}">seatNumber</span> is available for this performance - do you want to
-            book it?
-
-            <form action="/booking" method="post" th:object="${bean.availability.available}">
-                <input type="hidden" th:field="*{seat}"/>
-                <input type="hidden" th:field="*{performance}"/>
-                Customer Name: <input type="text" th:field="*{customerName}"/>
-                <input type="submit" value="Book now"/>
-            </form>
-        </th:block>
-        <p th:if="*{unavailable!=null}">
-            I'm sorry - this seat is alredy booked for this performance. The customer is <span
-                th:text="*{unavailable.booking.customerName}"></span>
-        </p>
-    </div>
 </form>
+<div th:if="${bean.available!=null}">
+    Seat <span th:text="${bean.available.seat}">seatNumber</span> is available for this performance - do you want to
+    book it?
+
+    <form action="/booking" method="post" th:object="${bean.available}">
+        <input type="hidden" th:field="*{seat}"/>
+        <input type="hidden" th:field="*{performance}"/>
+        Customer Name: <input type="text" th:field="*{customerName}"/>
+        <input type="submit" value="Book now"/>
+    </form>
+    <p th:if="${bean.unavailable!=null}">
+        I'm sorry - this seat is alredy booked for this performance. The customer is <span
+            th:text="*{bean.unavailable.booking.customerName}"></span>
+    </p>
+</div>
 </body>

@@ -1,7 +1,6 @@
 package com.virtualpairprogrammers.theater.control
 
-import com.virtualpairprogrammers.theater.control.Availability.Available
-import com.virtualpairprogrammers.theater.control.Availability.Unavailable
+import com.virtualpairprogrammers.theater.annotations.GenerateNoArgConstructor
 import com.virtualpairprogrammers.theater.data.PerformanceRepository
 import com.virtualpairprogrammers.theater.data.SeatRepository
 import com.virtualpairprogrammers.theater.domain.Booking
@@ -15,16 +14,15 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.servlet.ModelAndView
+import javax.persistence.Embeddable
 
 @Controller
 class MainController(
         val theaterService: TheaterService,
         val bookingService: BookingService,
         val seatRepository: SeatRepository,
-        val performanceRepository: PerformanceRepository
+        val performanceRepository: PerformanceRepository,
 ) {
-    var logger = LoggerFactory.getLogger(MainController::class.java)
-
     @RequestMapping("")
     fun homePage() = withBean(CheckAvailabilityBackingBean())
 
@@ -39,9 +37,9 @@ class MainController(
         val bean = run {
             val booking = bookingService.find(selectedSeat, selectedPerformance)
             if (booking != null)
-                bean.copy(availability = Unavailable(booking))
+                bean.copy(unavailable = Unavailable(booking))
             else
-                bean.copy(availability = Available(
+                bean.copy(available = Available(
                         performance = selectedPerformance,
                         seat = selectedSeat,
                         customerName = ""))
@@ -50,14 +48,22 @@ class MainController(
         withBean(bean)
     }
 
-    fun withBean(bean: CheckAvailabilityBackingBean) = run {
-        val modelAndView = ModelAndView("seatBooking")
-        modelAndView.addObject("performances", performanceRepository.findAll())
-        modelAndView.addObject("seatNums", CheckAvailabilityBackingBean.seatNums)
-        modelAndView.addObject("seatRows", CheckAvailabilityBackingBean.seatRows)
-        modelAndView.addObject("bean", bean)
-        modelAndView
+    @RequestMapping("booking", method = [RequestMethod.POST])
+    fun bookASeat(bean: CheckAvailabilityBackingBean) = run {
+        if (bean.available == null) {
+            throw NullPointerException("available cannot be null")
+        }
+
+        val available = bean.available
+        val booking = bookingService.reserveSeat(available.seat, available.performance, available.customerName)
+        ModelAndView("bookingConfirmed", "booking", booking)
     }
+
+    private fun withBean(bean: CheckAvailabilityBackingBean) = ModelAndView("seatBooking")
+            .addObject("performances", performanceRepository.findAll())
+            .addObject("seatNums", CheckAvailabilityBackingBean.seatNums)
+            .addObject("seatRows", CheckAvailabilityBackingBean.seatRows)
+            .addObject("bean", bean)
 }
 
 data class CheckAvailabilityBackingBean(
@@ -65,7 +71,8 @@ data class CheckAvailabilityBackingBean(
         val selectedSeatRow: Char = 'A',
         val selectedPerformanceId: Long? = null,
 
-        val availability: Availability? = null
+        val available: Available? = null,
+        val unavailable: Unavailable? = null,
 ) {
     companion object {
         val seatNums = 1..36
@@ -73,10 +80,8 @@ data class CheckAvailabilityBackingBean(
     }
 }
 
-sealed class Availability {
-    data class Available(val seat: Seat, val performance: Performance, val customerName: String) : Availability()
-    data class Unavailable(val booking: Booking) : Availability()
+@GenerateNoArgConstructor
+data class Available(val seat: Seat, val performance: Performance, val customerName: String)
 
-    val available get() = this as? Available
-    val unavailable get() = this as? Unavailable
-}
+@GenerateNoArgConstructor
+data class Unavailable(val booking: Booking)
